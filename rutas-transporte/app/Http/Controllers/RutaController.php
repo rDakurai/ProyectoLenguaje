@@ -9,16 +9,18 @@ class RutaController extends Controller
 {
     public function index(Request $request)
     {
-        $q = trim($request->get('q', ''));
+    $q = trim($request->get('q', ''));
 
-        $rutas = Ruta::query()
-            ->when($q, fn($qbuilder) => $qbuilder->where('nombre', 'like', "%{$q}%"))
-            ->orderBy('nombre')
-            ->paginate(10)
-            ->withQueryString();
+    $rutas = \App\Models\Ruta::query()
+        ->when($q, fn($qb) => $qb->where('nombre', 'like', "%{$q}%"))
+        ->withCount(['paradas as paradas_count', 'horarios']) // <- contadores
+        ->orderBy('nombre')
+        ->paginate(9)
+        ->withQueryString();
 
-        return view('rutas.index', compact('rutas', 'q'));
+    return view('rutas.index', compact('rutas', 'q'));
     }
+
 
     public function show(Ruta $ruta)
     {
