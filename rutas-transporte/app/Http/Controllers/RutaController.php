@@ -7,79 +7,41 @@ use Illuminate\Http\Request;
 
 class RutaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+    $q = trim($request->get('q', ''));
+
+    $rutas = \App\Models\Ruta::query()
+        ->when($q, fn($qb) => $qb->where('nombre', 'like', "%{$q}%"))
+        ->withCount(['paradas as paradas_count', 'horarios']) // <- contadores
+        ->orderBy('nombre')
+        ->paginate(9)
+        ->withQueryString();
+
+    return view('rutas.index', compact('rutas', 'q'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Ruta  $ruta
-     * @return \Illuminate\Http\Response
-     */
     public function show(Ruta $ruta)
     {
-        //
+    // Orden fijo para los días
+    $ordenDias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+
+    // Cargar relaciones con orden ya desde la BD
+    $ruta->load([
+        'paradasIda',
+        'paradasVuelta',
+        'horarios' => fn($q) => $q
+            ->orderByRaw("FIELD(dia_semana,'Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo')")
+            ->orderByRaw("FIELD(sentido,'Ida','Vuelta')")
+            ->orderBy('hora_salida'),
+    ]);
+
+    // Días disponibles para el select, pero en el orden definido
+    $diasDisponibles = $ruta->horarios()->select('dia_semana')->distinct()->pluck('dia_semana')->all();
+    $dias = array_values(array_intersect($ordenDias, $diasDisponibles));
+
+    return view('rutas.show', compact('ruta', 'dias'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Ruta  $ruta
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Ruta $ruta)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Ruta  $ruta
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Ruta $ruta)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Ruta  $ruta
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Ruta $ruta)
-    {
-        //
-    }
 }
