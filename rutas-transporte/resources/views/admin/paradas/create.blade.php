@@ -1,0 +1,35 @@
+@extends('layouts.app')
+@section('title','Nueva parada - '.$ruta->nombre)
+
+@section('content')
+<h1 class="h4 mb-3">Nueva parada para: {{ $ruta->nombre }}</h1>
+
+<form method="POST" action="{{ route('admin.rutas.paradas.store', $ruta) }}" class="card p-3 shadow-sm">
+  @csrf
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Nombre *</label>
+      <input name="nombre" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Dirección</label>
+      <input name="direccion" class="form-control">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Sentido *</label>
+      <select name="sentido" class="form-select" required>
+        <option value="Ida">Ida</option>
+        <option value="Vuelta">Vuelta</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Orden *</label>
+      <input name="orden" type="number" min="1" class="form-control" required>
+    </div>
+  </div>
+  <div class="mt-3 d-flex gap-2">
+    <button class="btn btn-success" type="submit">Guardar</button>
+    <a href="{{ route('rutas.show',$ruta) }}" class="btn btn-secondary">Cancelar</a>
+  </div>
+</form>
+@endsection

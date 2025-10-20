@@ -26,6 +26,46 @@
     <a class="navbar-brand fw-semibold" href="{{ route('rutas.index') }}">
       <i class="bi bi-bus-front me-2"></i>Rutas Transporte
     </a>
+
+    {{-- Botón hamburguesa para móvil --}}
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    {{-- Contenido colapsable --}}
+    <div class="collapse navbar-collapse" id="mainNav">
+      {{-- (Opcional) Links a la izquierda --}}
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {{-- Ejemplo:
+        <li class="nav-item"><a class="nav-link" href="#">Inicio</a></li>
+        --}}
+      </ul>
+
+      {{-- Botones Auth a la derecha --}}
+      <div class="d-flex align-items-center gap-2">
+        @guest
+          <a href="{{ route('login') }}" class="btn btn-outline-secondary">Iniciar sesión</a>
+          <a href="{{ route('register') }}" class="btn btn-primary">Registrarse</a>
+        @else
+          {{-- Si luego tienes panel de admin, puedes mostrarlo así:
+          @if(auth()->user()->is_admin ?? false)
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-warning">Admin</a>
+          @endif
+          --}}
+
+          {{-- Nombre del usuario (opcional) --}}
+          <span class="text-secondary small d-none d-lg-inline">
+            <i class="bi bi-person-circle me-1"></i>{{ auth()->user()->name }}
+          </span>
+
+          <form action="{{ route('logout') }}" method="POST" class="d-inline">
+            @csrf
+            <button type="submit" class="btn btn-outline-danger">Salir</button>
+          </form>
+        @endguest
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -44,3 +84,4 @@
 @stack('scripts')
 </body>
 </html>
+
