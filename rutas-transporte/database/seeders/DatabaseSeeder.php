@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\Ruta;
 use App\Models\Parada;
 use App\Models\Horario;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,6 +22,7 @@ class DatabaseSeeder extends Seeder
         DB::table('horarios')->truncate();
         DB::table('paradas')->truncate();
         DB::table('rutas')->truncate();
+        DB::table('users')->truncate();
         Schema::enableForeignKeyConstraints();
 
         // 1) Crear una ruta de ejemplo
@@ -80,6 +84,24 @@ class DatabaseSeeder extends Seeder
                 'hora_salida' => '20:00',
                 'sentido' => 'Vuelta',
             ]);
-        }
+
+            User::updateOrCreate(
+                ['email' => 'admin@example.com'],
+                [
+                    'name' => 'Admin',
+                    'password' => Hash::make('password'), // cámbiala luego
+                    'is_admin' => true,
+                ]
+            );
+
+            User::updateOrCreate(
+                ['email' => 'user@example.com'],
+                [
+                    'name' => 'Usuario',
+                    'password' => Hash::make('password'),
+                    'is_admin' => false,
+                ]
+            );
+        }   
     }
 }

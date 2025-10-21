@@ -2,84 +2,81 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ruta;
 use App\Models\Horario;
 use Illuminate\Http\Request;
 
 class HorarioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    // ----------- MÉTODOS PARA RUTA -----------
+
+    /** Form para crear un Horario para una Ruta concreta. */
+    public function createForRuta(Ruta $ruta)
     {
-        //
+        $dias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+        return view('admin.horarios.create', compact('ruta','dias'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    /** Guarda el horario y lo asocia a la ruta. */
+    public function storeForRuta(Request $request, Ruta $ruta)
     {
-        //
+        $data = $request->validate([
+            'dia_semana'  => ['required','in:Lunes,Martes,Miércoles,Jueves,Viernes,Sábado,Domingo'],
+            'hora_salida' => ['required','date_format:H:i'],
+            'sentido'     => ['required','in:Ida,Vuelta'],
+        ]);
+
+        Horario::create([
+            'ruta_id'     => $ruta->id,
+            'dia_semana'  => $data['dia_semana'],
+            'hora_salida' => $data['hora_salida'],
+            'sentido'     => $data['sentido'],
+        ]);
+
+        return redirect()->route('rutas.show', $ruta)->with('ok', 'Horario añadido correctamente.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    /** Form de edición de un Horario de una Ruta. */
+    public function editForRuta(Ruta $ruta, Horario $horario)
     {
-        //
+        abort_unless($horario->ruta_id === $ruta->id, 404);
+        $dias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+        return view('admin.horarios.edit', compact('ruta','horario','dias'));
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Horario  $horario
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Horario $horario)
+    /** Actualiza un Horario de una Ruta. */
+    public function updateForRuta(Request $request, Ruta $ruta, Horario $horario)
     {
-        //
+        abort_unless($horario->ruta_id === $ruta->id, 404);
+
+        $data = $request->validate([
+            'dia_semana'  => ['required','in:Lunes,Martes,Miércoles,Jueves,Viernes,Sábado,Domingo'],
+            'hora_salida' => ['required','date_format:H:i'],
+            'sentido'     => ['required','in:Ida,Vuelta'],
+        ]);
+
+        $horario->update($data);
+
+        return redirect()->route('rutas.show', $ruta)->with('ok', 'Horario actualizado correctamente.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Horario  $horario
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Horario $horario)
+    /** Elimina un Horario de una Ruta. */
+    public function destroyForRuta(Ruta $ruta, Horario $horario)
     {
-        //
+        abort_unless($horario->ruta_id === $ruta->id, 404);
+
+        $horario->delete();
+
+        return redirect()->route('rutas.show', $ruta)->with('ok', 'Horario eliminado correctamente.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Horario  $horario
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Horario $horario)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Horario  $horario
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Horario $horario)
-    {
-        //
-    }
+    // ----------- RESTO (scaffold opcional) -----------
+    public function index()   { /* no usado aquí */ }
+    public function create()  { /* no usado aquí */ }
+    public function store(Request $request) { /* no usado aquí */ }
+    public function show(Horario $horario)  { /* no usado aquí */ }
+    public function edit(Horario $horario)  { /* no usado aquí */ }
+    public function update(Request $request, Horario $horario) { /* no usado aquí */ }
+    public function destroy(Horario $horario) { /* no usado aquí */ }
 }
+
